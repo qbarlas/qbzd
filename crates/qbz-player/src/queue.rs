@@ -675,6 +675,56 @@ impl QueueManager {
         canonical_index.and_then(|idx| self.play_index(idx))
     }
 
+    /// Realign the cursor onto the track the player is actually playing.
+    ///
+    /// Gapless transitions happen inside the audio thread: it swaps
+    /// `current_track_id` on its own and nothing advances this queue, so the
+    /// cursor silently drifts behind. Once it has drifted, `peek_upcoming`
+    /// and `next` answer from the wrong position — which replays an earlier
+    /// track or reports an empty queue while tracks remain.
+    ///
+    /// Searches forward from the current cursor (wrapping once) so a queue
+    /// holding the same track twice resolves to the upcoming occurrence
+    /// rather than the one already played. Returns true when the cursor
+    /// moved.
+    pub fn sync_to_track_id(&self, track_id: u64) -> bool {
+        let mut state = self.state.lock().unwrap();
+        if state.tracks.is_empty() {
+            return false;
+        }
+
+        if let Some(curr_idx) = state.current_index {
+            if state.tracks.get(curr_idx).map(|t| t.id) == Some(track_id) {
+                return false; // already aligned
+            }
+        }
+
+        let len = state.tracks.len();
+        let start = state.current_index.map(|i| i + 1).unwrap_or(0);
+        let found = (0..len)
+            .map(|offset| (start + offset) % len)
+            .find(|&idx| state.tracks[idx].id == track_id);
+
+        let Some(idx) = found else {
+            return false;
+        };
+
+        if let Some(curr_idx) = state.current_index {
+            state.history.push_back(curr_idx);
+            while state.history.len() > 50 {
+                state.history.pop_front();
+            }
+        }
+
+        state.current_index = Some(idx);
+        if state.shuffle {
+            if let Some(pos) = state.shuffle_order.iter().position(|&x| x == idx) {
+                state.shuffle_position = pos;
+            }
+        }
+        true
+    }
+
     /// Jump to a specific track by index
     pub fn play_index(&self, index: usize) -> Option<QueueTrack> {
         let mut state = self.state.lock().unwrap();
@@ -1836,5 +1886,87 @@ mod tests {
         let state = queue.get_state();
 
         assert_eq!(state.stop_after_track_id, None);
+    }
+
+    #[test]
+    fn sync_to_track_id_realigns_cursor_after_gapless_drift() {
+        let queue = QueueManager::new();
+        queue.set_queue(
+            vec![
+                create_test_track(1),
+                create_test_track(2),
+                create_test_track(3),
+                create_test_track(4),
+            ],
+            Some(0),
+        );
+
+        // The audio thread advanced to track 3 on its own; the cursor is
+        // still on track 1 and would hand out stale neighbours.
+        assert_eq!(
+            queue.peek_upcoming(2).iter().map(|t| t.id).collect::<Vec<_>>(),
+            vec![2, 3]
+        );
+
+        assert!(queue.sync_to_track_id(3));
+
+        assert_eq!(queue.current_track().map(|t| t.id), Some(3));
+        assert_eq!(
+            queue.peek_upcoming(2).iter().map(|t| t.id).collect::<Vec<_>>(),
+            vec![4]
+        );
+        assert_eq!(queue.next().map(|t| t.id), Some(4));
+    }
+
+    #[test]
+    fn sync_to_track_id_is_a_noop_when_already_aligned() {
+        let queue = QueueManager::new();
+        queue.set_queue(vec![create_test_track(1), create_test_track(2)], Some(0));
+
+        assert!(!queue.sync_to_track_id(1));
+        assert_eq!(queue.current_track().map(|t| t.id), Some(1));
+    }
+
+    #[test]
+    fn sync_to_track_id_picks_the_upcoming_duplicate() {
+        let queue = QueueManager::new();
+        queue.set_queue(
+            vec![
+                create_test_track(7),
+                create_test_track(8),
+                create_test_track(7),
+                create_test_track(9),
+            ],
+            Some(0),
+        );
+
+        // Player went 7 -> 8 -> 7: the second sync must land on index 2,
+        // not walk back to index 0, so the follow-up track is 9 and not 8.
+        assert!(queue.sync_to_track_id(8));
+        assert!(queue.sync_to_track_id(7));
+        assert_eq!(queue.next().map(|t| t.id), Some(9));
+    }
+
+    #[test]
+    fn sync_to_track_id_ignores_a_repeat_of_the_current_track() {
+        let queue = QueueManager::new();
+        queue.set_queue(
+            vec![create_test_track(7), create_test_track(8), create_test_track(7)],
+            Some(0),
+        );
+
+        // Repeat-one replays the same id: the cursor must stay put rather
+        // than jump onto the later duplicate and skip track 8.
+        assert!(!queue.sync_to_track_id(7));
+        assert_eq!(queue.next().map(|t| t.id), Some(8));
+    }
+
+    #[test]
+    fn sync_to_track_id_leaves_cursor_alone_for_unknown_track() {
+        let queue = QueueManager::new();
+        queue.set_queue(vec![create_test_track(1), create_test_track(2)], Some(0));
+
+        assert!(!queue.sync_to_track_id(999));
+        assert_eq!(queue.current_track().map(|t| t.id), Some(1));
     }
 }

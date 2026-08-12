@@ -355,6 +355,21 @@ impl<A: FrontendAdapter + Send + Sync + 'static> QbzCore<A> {
         track
     }
 
+    /// Realign the queue cursor onto the track the player is actually
+    /// playing, after the audio thread advanced on its own (gapless).
+    /// Emits QueueUpdated only when the cursor actually moved.
+    pub async fn sync_queue_to_track(&self, track_id: u64) -> bool {
+        let queue = self.queue.write().await;
+        let moved = queue.sync_to_track_id(track_id);
+        if moved {
+            self.emit(CoreEvent::QueueUpdated {
+                state: queue.get_state(),
+            })
+            .await;
+        }
+        moved
+    }
+
     /// Go to previous track in queue
     pub async fn previous_track(&self) -> Option<QueueTrack> {
         let queue = self.queue.write().await;

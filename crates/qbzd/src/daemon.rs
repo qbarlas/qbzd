@@ -276,6 +276,21 @@ fn spawn_playback_orchestrator(daemon: Arc<DaemonCore>) {
             let is_playing = state.is_playing();
             let gapless_ready = state.is_gapless_ready();
 
+            // === QUEUE RESYNC ===
+            // The audio thread performs gapless transitions on its own: it
+            // swaps current_track_id without going through the queue, so the
+            // queue cursor stays on the track we started from. Left alone it
+            // drifts further with every transition, and both branches below
+            // then answer from the wrong position — replaying an earlier
+            // track, or declaring the queue empty while tracks remain.
+            // Realign before anything reads the queue.
+            if track_id != 0
+                && track_id != last_track_id
+                && daemon.core.sync_queue_to_track(track_id).await
+            {
+                log::debug!("[qbzd/queue] Cursor realigned onto track {}", track_id);
+            }
+
             // === GAPLESS PRE-QUEUE ===
             // When player signals gapless_ready (5s before track end),
             // download next track and queue it for seamless transition.
