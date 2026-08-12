@@ -176,7 +176,6 @@ crates/
   qbz-qobuz/              Qobuz API client and OAuth
   qbz-models/             Shared domain types
   qbz-cache/              Audio cache (memory + disk)
-  qbz-cmaf/               CMAF/MP4 fragment parser (used by qbz-qobuz)
   qconnect-protocol/      Qobuz Connect protobuf wire format
   qconnect-core/          Queue and renderer state machines
   qconnect-app/           QConnect application logic

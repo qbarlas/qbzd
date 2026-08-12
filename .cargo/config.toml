@@ -1,16 +1,19 @@
 # Enable CPU intrinsics for AES-NI + SSSE3 on x86_64 targets only.
 #
-# The qbz-cmaf crate does AES-128-CTR decrypt on every offline-cached
-# audio frame. Without AES-NI the decrypt falls back to a software
-# implementation that hits ~10 MB/s on a modern CPU; with AES-NI it
-# clears 400+ MB/s. For HiRes (200 MB+ tracks) this is the difference
-# between a 20-second gap and a sub-second one.
+# ORIGINAL RATIONALE (no longer applies): the qbz-cmaf crate did
+# AES-128-CTR decrypt on every offline-cached audio frame, where AES-NI
+# was the difference between ~10 MB/s and 400+ MB/s. That crate and the
+# whole CMAF path were removed — the daemon streams via the legacy
+# track/getFileUrl endpoint, which is not encrypted.
 #
-# What we need is ONLY the AES-NI instruction set compiled in. The
-# `aes` crate uses `cpufeatures::new!` to do a runtime CPUID check
+# The flags are kept because TLS (rustls) is now the only meaningful
+# AES consumer in the binary. That benefit is UNMEASURED here: if you
+# want to drop these flags, benchmark HTTPS throughput to Qobuz first.
+#
+# Crypto crates use `cpufeatures::new!` to do a runtime CPUID check
 # before dispatching to the hardware path, so as long as the AES-NI
 # code is present in the binary, CPUs without AES-NI fall back to the
-# software implementation gracefully — no crash, just slower decrypt.
+# software implementation gracefully — no crash, just slower.
 #
 # `target-feature=+aes,+ssse3` is what enables that compile-in.
 # SSSE3 has been in every x86_64 CPU since 2006 (Core 2).

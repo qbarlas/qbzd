@@ -92,8 +92,7 @@ impl StreamingConfig {
     /// - Very slow (<1 MB/s): 2MB
     ///
     /// Result is clamped to the process-wide cap configured via
-    /// [`set_max_initial_buffer_bytes`] (typically derived from the host's
-    /// memory profile — see qbz-core's system_capabilities). On
+    /// [`set_max_initial_buffer_bytes`]. On
     /// memory-constrained hosts the slow-connection branches would
     /// otherwise inflate to 2 MB, which is exactly the wrong direction
     /// when "slow connection" is itself a symptom of swap thrash

@@ -8,7 +8,6 @@ members = [
     "qbz-qobuz",
     "qbz-core",
     "qbz-cache",
-    "qbz-cmaf",
     "qconnect-core",
     "qconnect-protocol",
     "qconnect-transport-ws",

@@ -54,7 +54,6 @@
 
 pub mod core;
 pub mod error;
-pub mod system_capabilities;
 
 // Re-exports from qbz-models for convenience
 pub use qbz_models::{CoreEvent, FrontendAdapter, LoggingAdapter, NoOpAdapter};

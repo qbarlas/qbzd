@@ -80,7 +80,7 @@ pub async fn run(config: DaemonConfig) -> Result<(), String> {
 
     // Create player (audio thread starts immediately)
     let diagnostic = AudioDiagnostic::new();
-    let player = Player::new(device_name, audio_settings, None, diagnostic);
+    let player = Player::new(device_name, audio_settings, diagnostic);
 
     // Create QbzCore — this extracts Qobuz bundle tokens (requires network)
     let core = QbzCore::new(adapter, player);

@@ -37,7 +37,6 @@ pub mod alsa_error_handler;
 pub mod pulse_backend;
 pub mod alsa_direct;
 pub mod coreaudio_direct;
-pub mod analysis;
 pub mod analyzer_tap;
 pub mod device_reservation;
 pub mod diagnostic;
@@ -47,7 +46,6 @@ pub mod loudness_analyzer;
 pub mod loudness_cache;
 pub mod output_sinks;
 pub mod settings;
-pub mod visualizer;
 
 // Re-export commonly used types
 #[cfg(target_os = "linux")]
@@ -56,7 +54,6 @@ pub use alsa_backend::{
     resolve_stable_to_current_hw,
 };
 pub use alsa_direct::AlsaDirectStream;
-pub use analysis::SpectralAnalyzer;
 pub use analyzer_tap::{AnalyzerMessage, AnalyzerTap};
 pub use backend::{
     AlsaDirectError, AlsaPlugin, AudioBackend, AudioBackendType, AudioDevice, BackendConfig,
@@ -71,7 +68,6 @@ pub use loudness_analyzer::LoudnessAnalyzer;
 pub use loudness_cache::LoudnessCache;
 pub use output_sinks::{list_output_sinks, OutputSinkInfo};
 pub use settings::AudioSettings;
-pub use visualizer::{RingBuffer, TappedSource, VisualizerTap};
 
 /// Stub: returns the ID unchanged on non-Linux (no ALSA normalization needed).
 #[cfg(not(target_os = "linux"))]

@@ -27,7 +27,7 @@
 //! use qbz_player::{Player, QueueManager};
 //! use qbz_audio::{AudioSettings, AudioDiagnostic};
 //!
-//! let player = Player::new(None, AudioSettings::default(), None, AudioDiagnostic::new());
+//! let player = Player::new(None, AudioSettings::default(), AudioDiagnostic::new());
 //! let queue = QueueManager::new();
 //! ```
 
