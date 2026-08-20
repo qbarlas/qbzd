@@ -19,7 +19,7 @@ macOS, web) as a castable device.
 On the Proxmox host, as root:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/qbarlas/qbzd/main/install/proxmox-lxc.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/yet-another-quentin/qbzd/main/install/proxmox-lxc.sh)
 ```
 
 The installer creates an unprivileged Debian 12 container, passes `/dev/snd`
@@ -101,7 +101,7 @@ pct restart <CTID>
 Optional: start qbzd when the DAC is plugged in, stop it when unplugged.
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/qbarlas/qbzd/main/install/proxmox-dac-watch.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/yet-another-quentin/qbzd/main/install/proxmox-dac-watch.sh)
 ```
 
 This writes a udev rule on the host that drives

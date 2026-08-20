@@ -9,7 +9,7 @@
 # release tarball published by the upstream project.
 #
 # Usage (on the Proxmox host, as root):
-#   bash <(curl -fsSL https://raw.githubusercontent.com/qbarlas/qbzd/main/install/proxmox-lxc.sh)
+#   bash <(curl -fsSL https://raw.githubusercontent.com/yet-another-quentin/qbzd/main/install/proxmox-lxc.sh)
 #
 # Environment overrides:
 #   CTID=200 MEMORY=512 DISK=4 STORAGE=local-lvm AUDIO=alsa CHANNEL=v2.0.2 bash <(...)
@@ -356,7 +356,7 @@ echo -e "    ${BF}pct exec $CTID -- qbzd-update${CL}           # latest upstream
 echo -e "    ${BF}pct exec $CTID -- qbzd-update v2.0.2${CL}    # specific tag"
 echo
 echo    "  Auto start/stop with DAC (optional):"
-echo -e "    ${BF}bash <(curl -fsSL https://raw.githubusercontent.com/qbarlas/qbzd/main/install/proxmox-dac-watch.sh)${CL}"
+echo -e "    ${BF}bash <(curl -fsSL https://raw.githubusercontent.com/yet-another-quentin/qbzd/main/install/proxmox-dac-watch.sh)${CL}"
 echo
 if [[ "$AUDIO" == "none" ]]; then
     echo -e "  ${YW}⚠ No audio backend configured — qbzd will run without real output.${CL}"
