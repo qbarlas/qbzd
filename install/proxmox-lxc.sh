@@ -38,7 +38,10 @@ case "$ARCH" in
 esac
 
 CTID="${CTID:-$(pvesh get /cluster/nextid 2>/dev/null || echo 200)}"
-HOSTNAME="${HOSTNAME:-qbzd}"
+# CT_HOSTNAME, not HOSTNAME: bash sets HOSTNAME itself, to the name of the
+# machine running the script. `${HOSTNAME:-qbzd}` therefore never falls back to
+# qbzd — it silently names the container after the Proxmox host.
+CT_HOSTNAME="${CT_HOSTNAME:-qbzd}"
 MEMORY="${MEMORY:-256}"
 DISK="${DISK:-2}"
 CORES="${CORES:-1}"
@@ -78,7 +81,7 @@ echo
 echo -e "${BF}  qbzd — Proxmox LXC installer${CL}"
 echo    "  ─────────────────────────────"
 echo    "  Container ID  : $CTID"
-echo    "  Hostname      : $HOSTNAME"
+echo    "  Hostname      : $CT_HOSTNAME"
 echo    "  RAM / Disk    : ${MEMORY} MB / ${DISK} GB"
 echo    "  Storage       : $STORAGE"
 echo    "  Arch          : $ARCH"
@@ -108,7 +111,7 @@ ok "Template ready: $TEMPLATE_NAME"
 # ── Create container ──────────────────────────────────────────────────────────
 msg "Creating LXC container $CTID..."
 pct create "$CTID" "$TEMPLATE_STORAGE:vztmpl/$TEMPLATE_NAME" \
-    --hostname    "$HOSTNAME" \
+    --hostname    "$CT_HOSTNAME" \
     --memory      "$MEMORY" \
     --cores       "$CORES" \
     --rootfs      "$STORAGE:$DISK" \
@@ -332,7 +335,7 @@ CT_IP=$(pct exec "$CTID" -- hostname -I 2>/dev/null | awk '{print $1}') \
 echo
 echo -e "${GN}${BF}  Container ready — one manual step left.${CL}"
 echo    "  ─────────────────────────────────────────────────"
-echo    "  Container: $CTID ($HOSTNAME)  —  IP: $CT_IP"
+echo    "  Container: $CTID ($CT_HOSTNAME)  —  IP: $CT_IP"
 echo
 echo    "  1. Run the configurator. It is an interactive TUI (Qobuz login,"
 echo    "     audio device, Connect device name), so it needs a real terminal:"

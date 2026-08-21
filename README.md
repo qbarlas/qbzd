@@ -42,7 +42,7 @@ user, because it writes the same stores the service reads.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `CTID` | next available | Container ID |
-| `HOSTNAME` | `qbzd` | Container hostname |
+| `CT_HOSTNAME` | `qbzd` | Container hostname (not `HOSTNAME` — bash already owns that name) |
 | `MEMORY` | `256` | RAM in MB |
 | `DISK` | `2` | Disk in GB |
 | `CORES` | `1` | CPU cores |
