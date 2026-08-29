@@ -128,8 +128,12 @@ LXC_CONF="/etc/pve/lxc/${CTID}.conf"
 case "$AUDIO" in
   alsa)
     if [[ -d /dev/snd ]]; then
-        ALSA_MAJOR=$(stat -c '%t' /dev/snd/controlC0 2>/dev/null \
-            | xargs printf '%d\n' || echo 116)
+        # /proc/devices lists the major in decimal ("116 alsa"). Do not read it
+        # from `stat -c '%t'`: that prints hex (74), which then has to be
+        # converted — getting it wrong writes a cgroup rule for major 74 and
+        # every open of /dev/snd/* inside the container fails with EPERM.
+        ALSA_MAJOR=$(awk '$2 == "alsa" { print $1 }' /proc/devices | head -1)
+        [[ -n "$ALSA_MAJOR" ]] || ALSA_MAJOR=116
         msg "Adding ALSA passthrough (major $ALSA_MAJOR)..."
         cat >> "$LXC_CONF" <<EOF
 
