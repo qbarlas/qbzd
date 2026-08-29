@@ -43,7 +43,7 @@ user, because it writes the same stores the service reads.
 |----------|---------|-------------|
 | `CTID` | next available | Container ID |
 | `CT_HOSTNAME` | `qbzd` | Container hostname (not `HOSTNAME` — bash already owns that name) |
-| `MEMORY` | `256` | RAM in MB |
+| `MEMORY` | `512` | RAM in MB |
 | `DISK` | `2` | Disk in GB |
 | `CORES` | `1` | CPU cores |
 | `STORAGE` | `local-lvm` | Proxmox storage pool |
@@ -52,7 +52,7 @@ user, because it writes the same stores the service reads.
 | `CHANNEL` | `latest` | Upstream release: `latest` or a tag (e.g. `v2.0.2`) |
 
 ```bash
-CTID=200 MEMORY=512 AUDIO=alsa bash <(curl -fsSL .../proxmox-lxc.sh)
+CTID=200 MEMORY=1024 AUDIO=alsa bash <(curl -fsSL .../proxmox-lxc.sh)
 ```
 
 **Use ALSA.** On a USB DAC it is bit-perfect and runs no sound server inside the

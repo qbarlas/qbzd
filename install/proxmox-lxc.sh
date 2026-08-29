@@ -12,7 +12,7 @@
 #   bash <(curl -fsSL https://raw.githubusercontent.com/yet-another-quentin/qbzd/main/install/proxmox-lxc.sh)
 #
 # Environment overrides:
-#   CTID=200 MEMORY=512 DISK=4 STORAGE=local-lvm AUDIO=alsa CHANNEL=v2.0.2 bash <(...)
+#   CTID=200 MEMORY=1024 DISK=4 STORAGE=local-lvm AUDIO=alsa CHANNEL=v2.0.2 bash <(...)
 
 set -euo pipefail
 
@@ -42,7 +42,7 @@ CTID="${CTID:-$(pvesh get /cluster/nextid 2>/dev/null || echo 200)}"
 # machine running the script. `${HOSTNAME:-qbzd}` therefore never falls back to
 # qbzd — it silently names the container after the Proxmox host.
 CT_HOSTNAME="${CT_HOSTNAME:-qbzd}"
-MEMORY="${MEMORY:-256}"
+MEMORY="${MEMORY:-512}"
 DISK="${DISK:-2}"
 CORES="${CORES:-1}"
 BRIDGE="${BRIDGE:-vmbr0}"
